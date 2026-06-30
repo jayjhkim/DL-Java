@@ -6,6 +6,6 @@ public class Main {
         double[] yData={1,2,3};
 
         LinearRegressionModel model=new LinearRegressionModel(0,0);
-        model.train(xData,yData);
+        model.train(xData,yData, 0.1);
     }
 }

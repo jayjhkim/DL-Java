@@ -11,47 +11,61 @@ public class LinearRegressionModel {
 
     // linear 가설 공식
     public double hypo(double x){
-        return W*x+b;
+        return W*x;
     }
 
     // cost function 공식
     public double cost(double[] xData, double[] yData){
         double sum=0.0;
+        int m=xData.length;
 
-        for(int i=1; i<xData.length; i++) {
-            double hypothesis = hypo(xData[i]);
-            double error = hypothesis - yData[i];
-            sum += error * error;
+        for(int i=1; i<=m; i++){
+            double hypothesis=hypo(xData[i]);
+            double error=hypothesis-yData[i];
+            sum+=error*error;
         }
 
-        return sum/xData.length;
+        return sum/(2*m);
     }
 
-    public void train(double[] xData, double[] yData){
+    // gradient 계산
+    public double gradient(double[] xData, double[] yData){
+        int m=xData.length;
+        double sum=0.0;
 
-        while(true){
-            double currentCost=cost(xData, yData);
-            double step=currentCost*0.1;  // cost에 비례하여 변수의 값의 조정 비율을 결정
-
-            if (step < 0.000001) break;  // 충분히 작은 경우 멈춤
-
-            W += step;  // 증가시켜보기
-            if (cost(xData, yData) < currentCost) continue;
-            W -= step * 2;  // 감소시켜보기
-            if (cost(xData, yData) < currentCost) continue;
-            W += step;  // 증감 모두 별로면 원래대로 두기
-
-            currentCost = cost(xData, yData);
-
-            b += step;  // 증가시켜보기
-            if (cost(xData, yData) < currentCost) continue;
-            b -= step * 2;  // 감소시켜보기
-            if (cost(xData, yData) < currentCost) continue;
-            b += step;  // 증감 모두 별로면 원래대로 두기
-
-            break;
+        for(int i=1; i<=m; i++){
+            double error = hypo(xData[i]) - yData[i];
+            sum += error * xData[i];
         }
 
-        System.out.println("W: " + W + ", b: " + b + ", cost: " + cost(xData, yData));
+        return sum/m;
+    }
+
+    public void train(double[] xData, double[] yData, double learningRate){
+        int operationCnt=0;
+
+        // cost 구하기
+        while (true){
+            operationCnt++;
+            double prevCost=cost(xData, yData);
+            double prevW=W;
+
+            double grad=gradient(xData, yData);
+            W=W-learningRate*grad;
+
+            double newCost = cost(xData, yData);
+
+            if(operationCnt % 1000 == 1) {
+                System.out.println("op " + operationCnt + ", W = " + W + ", cost = " + newCost);
+            }
+
+            // cost가 더 이상 줄지 않으면 멈춤
+            if(prevCost <= newCost) {
+                W = prevW;  // 원위치
+                break;
+            }
+        }
+
+        System.out.println("Result - W: " + W + ", cost: " + cost(xData, yData));
     }
 }
